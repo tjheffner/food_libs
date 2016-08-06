@@ -7,20 +7,6 @@ CONSUMER_SECRET = ENV['EBOOKS_CONSUMER_SECRET']
 OAUTH_TOKEN = ENV['EBOOKS_OAUTH_TOKEN']
 OAUTH_TOKEN_SECRET = ENV['EBOOKS_OAUTH_TOKEN_SECRET']
 
-# Information about a particular Twitter user we know
-class UserInfo
-  attr_reader :username
-
-  # @return [Integer] how many times we can pester this user unprompted
-  attr_accessor :pesters_left
-
-  # @param username [String]
-  def initialize(username)
-    @username = username
-    @pesters_left = 1
-  end
-end
-
 # This is an example bot definition with event handlers commented out
 # You can define and instantiate as many bots as you like
 class MyBot < Ebooks::Bot
@@ -46,12 +32,16 @@ class MyBot < Ebooks::Bot
   def on_startup
     load_model!
 
+    # Short tweet to signal bot restart / connection.
+    signal = model.make_statement(50)
+    tweet(signal)
+
     scheduler.cron '0 0 * * *' do
          # Each day at midnight, post a single tweet
          tweet(model.make_statement)
     end
 
-    scheduler.every '2h' do
+    scheduler.every '1h' do
         statement = model.make_statement
         tweet(statement)
     end
@@ -71,39 +61,10 @@ class MyBot < Ebooks::Bot
 
   def on_mention(tweet)
     # Reply to a mention
-    # Become more inclined to pester a user when they talk to us
-    userinfo(tweet.user.screen_name).pesters_left += 1
-
-    delay do
-      reply(tweet, model.make_response(meta(tweet).mentionless, meta(tweet).limit))
-    end
   end
 
   def on_timeline(tweet)
-    return if tweet.retweeted_status?
-      return unless can_pester?(tweet.user.screen_name)
 
-      tokens = Ebooks::NLP.tokenize(tweet.text)
-
-      interesting = tokens.find { |t| top100.include?(t.downcase) }
-      very_interesting = tokens.find_all { |t| top20.include?(t.downcase) }.length > 2
-
-      delay do
-        if very_interesting
-          favorite(tweet) if rand < 0.5
-          retweet(tweet) if rand < 0.1
-          if rand < 0.01
-            userinfo(tweet.user.screen_name).pesters_left -= 1
-            reply(tweet, model.make_response(meta(tweet).mentionless, meta(tweet).limit))
-          end
-        elsif interesting
-          favorite(tweet) if rand < 0.05
-          if rand < 0.001
-            userinfo(tweet.user.screen_name).pesters_left -= 1
-            reply(tweet, model.make_response(meta(tweet).mentionless, meta(tweet).limit))
-          end
-        end
-      end
   end
 
   private
