@@ -1,4 +1,11 @@
 require 'twitter_ebooks'
+require 'dotenv'
+Dotenv.load(".env")
+
+CONSUMER_KEY = ENV['EBOOKS_CONSUMER_KEY']
+CONSUMER_SECRET = ENV['EBOOKS_CONSUMER_SECRET']
+OAUTH_TOKEN = ENV['EBOOKS_OAUTH_TOKEN']
+OAUTH_TOKEN_SECRET = ENV['EBOOKS_OAUTH_TOKEN_SECRET']
 
 # Information about a particular Twitter user we know
 class UserInfo
@@ -23,8 +30,8 @@ class MyBot < Ebooks::Bot
   def configure
     # Consumer details come from registering an app at https://dev.twitter.com/
     # Once you have consumer details, use "ebooks auth" for new access tokens
-    self.consumer_key = 'zcV9SzjxEWu0oQnua7nH1yrBW' # Your app consumer key
-    self.consumer_secret = 'J8OdJ6zZ1Pe7G1kV1MUN3oidZuhGW7BwAQNWrLfjk4AP5uEawp' # Your app consumer secret
+    self.consumer_key = EBOOKS_CONSUMER_KEY # Your app consumer key
+    self.consumer_secret = EBOOKS_CONSUMER_SECRET # Your app consumer secret
 
     # Users to block instead of interacting with
     self.blacklist = ['food_libs']
@@ -112,8 +119,8 @@ end
 
 # Make a MyBot and attach it to an account
 MyBot.new("food_libs") do |bot|
-  bot.access_token = "761806052316753924-tpnqEkdB3RUGAHEH0BlIM3CuYSi7IxE" # Token connecting the app to this account
-  bot.access_token_secret = "yBlzOAqPkTNLQUf9LzGCXipe9YKJI4xsELmhm12vFci6D" # Secret connecting the app to this account
+  bot.access_token = EBOOKS_OAUTH_TOKEN # Token connecting the app to this account
+  bot.access_token_secret = EBOOKS_OAUTH_TOKEN_SECRET # Secret connecting the app to this account
 
   bot.original = "foodpyramids"
 end
