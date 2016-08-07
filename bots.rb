@@ -32,18 +32,27 @@ class MyBot < Ebooks::Bot
   def on_startup
     load_model!
 
-    # Short tweet to signal bot restart / connection.
-    signal = model.make_statement(50)
-    tweet(signal)
+    # verify random works
+    tweet(Random.rand(10...42))
 
-    scheduler.cron '0 0 * * *' do
-         # Each day at midnight, post a single tweet
-         tweet(model.make_statement)
-    end
+    # scheduler.cron '0 0 * * *' do
+    #      # Each day at midnight, post a single tweet
+    #      tweet(model.make_statement)
+    # end
 
-    scheduler.every '1h' do
-        statement = model.make_statement
-        tweet(statement)
+    scheduler.every '5m' do
+
+        # generate parts of a tweet
+        smaller = model.make_statement(30)
+        statement = model.make_statement(Random.rand(25...60))
+        suffix = model.make_statement(Random.rand(2...30))
+
+        # randomize order that tweet is composed
+        letters = [smaller, statement, suffix]
+        letters = letters.shuffle
+
+        # make sure it's spaced okay
+        tweet(letters[0] + ' ' +letters[1] + ' ' + letters[2])
     end
 
   end
